@@ -1,0 +1,563 @@
+
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="theme-color" content="#080b12">
+  <title>360conv — Video Converter</title>
+  <style>
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      padding: 25px 15px;
+      background:
+        radial-gradient(ellipse at top, #10283c 0%, transparent 55%),
+        #080b12;
+      color: #f3f7ff;
+      font-family: Arial, sans-serif;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+
+    .app {
+      width: 100%;
+      max-width: 540px;
+      padding: 28px;
+      border: 1px solid #26394d;
+      border-radius: 24px;
+      background: rgba(15, 22, 34, .94);
+      box-shadow: 0 20px 80px #0008;
+    }
+
+    .logo {
+      text-align: center;
+      font-size: 34px;
+      font-weight: 900;
+      letter-spacing: -1.5px;
+      color: #fff;
+    }
+
+    .logo span { color: #00d4ff; }
+
+    .subtitle {
+      text-align: center;
+      color: #91a4b8;
+      font-size: 14px;
+      margin: 9px 0 27px;
+    }
+
+    .upload {
+      display: block;
+      padding: 30px 15px;
+      text-align: center;
+      border: 2px dashed #31516a;
+      border-radius: 17px;
+      background: #101d2b;
+      cursor: pointer;
+      transition: .2s;
+    }
+
+    .upload:hover {
+      border-color: #00d4ff;
+      background: #122638;
+    }
+
+    .upload-icon {
+      font-size: 38px;
+      margin-bottom: 12px;
+    }
+
+    .upload strong {
+      display: block;
+      font-size: 16px;
+    }
+
+    .upload small {
+      display: block;
+      color: #8297ab;
+      margin-top: 8px;
+    }
+
+    input[type="file"] { display: none; }
+
+    .file-info {
+      display: none;
+      margin-top: 18px;
+      padding: 14px;
+      border-radius: 12px;
+      background: #101b29;
+      color: #c7d5e3;
+      font-size: 13px;
+      line-height: 1.7;
+      overflow-wrap: anywhere;
+    }
+
+    .file-info strong { color: #fff; }
+
+    button {
+      width: 100%;
+      border: 0;
+      border-radius: 12px;
+      padding: 16px;
+      margin-top: 20px;
+      background: linear-gradient(110deg, #00a9df, #006bff);
+      color: white;
+      font-size: 16px;
+      font-weight: 800;
+      cursor: pointer;
+      transition: .2s;
+    }
+
+    button:disabled {
+      opacity: .45;
+      cursor: not-allowed;
+    }
+
+    button:not(:disabled):active { transform: scale(.98); }
+
+    .progress-area {
+      display: none;
+      margin-top: 22px;
+    }
+
+    .progress-label {
+      display: flex;
+      justify-content: space-between;
+      gap: 10px;
+      color: #b6c8d9;
+      font-size: 13px;
+      margin-bottom: 9px;
+    }
+
+    .progress-bg {
+      height: 9px;
+      border-radius: 20px;
+      background: #263747;
+      overflow: hidden;
+    }
+
+    .progress-bar {
+      width: 0%;
+      height: 100%;
+      background: linear-gradient(90deg, #00d4ff, #3977ff);
+      transition: width .2s;
+    }
+
+    .status {
+      margin-top: 12px;
+      color: #8ca5bb;
+      font-size: 13px;
+      text-align: center;
+      line-height: 1.5;
+    }
+
+    .result {
+      display: none;
+      margin-top: 20px;
+      padding: 17px;
+      border: 1px solid #176b54;
+      border-radius: 14px;
+      background: #0d251f;
+      text-align: center;
+    }
+
+    .result h3 {
+      margin: 0 0 8px;
+      color: #65e5ae;
+    }
+
+    .result p {
+      color: #a7c8ba;
+      font-size: 13px;
+      line-height: 1.5;
+    }
+
+    .download {
+      display: block;
+      padding: 15px;
+      border-radius: 10px;
+      background: #087e59;
+      color: white;
+      text-decoration: none;
+      font-weight: bold;
+      margin-top: 15px;
+    }
+
+    .note {
+      margin-top: 22px;
+      color: #71869b;
+      font-size: 12px;
+      line-height: 1.6;
+      text-align: center;
+    }
+
+    .error {
+      display: none;
+      margin-top: 17px;
+      padding: 13px;
+      border-radius: 10px;
+      background: #351719;
+      color: #ffb5b5;
+      font-size: 13px;
+      line-height: 1.5;
+      overflow-wrap: anywhere;
+    }
+
+    @media(max-width: 480px) {
+      .app { padding: 22px 17px; }
+      .logo { font-size: 30px; }
+    }
+  </style>
+</head>
+<body>
+
+<div class="app">
+  <div class="logo">360<span>conv</span></div>
+  <div class="subtitle">Простой конвертер видео в MP4</div>
+
+  <label class="upload" for="videoFile">
+    <div class="upload-icon">🎬</div>
+    <strong>Выбрать видео</strong>
+    <small>Нажми, чтобы загрузить файл</small>
+  </label>
+
+  <input id="videoFile" type="file" accept="video/*">
+
+  <div class="file-info" id="fileInfo">
+    <div><strong>Файл:</strong> <span id="fileName"></span></div>
+    <div><strong>Разрешение:</strong> <span id="fileResolution"></span></div>
+    <div><strong>Формат:</strong> <span id="fileRatio"></span></div>
+    <div><strong>Длительность:</strong> <span id="fileDuration"></span></div>
+    <div><strong>Водяной знак:</strong> 360conv</div>
+  </div>
+
+  <button id="convertBtn" disabled>Конвертировать в MP4</button>
+
+  <div class="progress-area" id="progressArea">
+    <div class="progress-label">
+      <span id="progressText">Подготовка...</span>
+      <span id="progressPercent">0%</span>
+    </div>
+    <div class="progress-bg">
+      <div class="progress-bar" id="progressBar"></div>
+    </div>
+    <div class="status" id="status">Загрузка конвертера...</div>
+  </div>
+
+  <div class="error" id="error"></div>
+
+  <div class="result" id="result">
+    <h3>Готово!</h3>
+    <p>Видео успешно конвертировано. Водяной знак 360conv встроен в изображение.</p>
+    <a class="download" id="downloadLink" download="360conv-video.mp4">
+      Скачать MP4
+    </a>
+  </div>
+
+  <div class="note">
+    360conv · shuto1337.github.io/360conv<br>
+    Пропорции исходного видео сохраняются. Водяной знак встраивается в MP4.
+    Обработка выполняется прямо в браузере.
+  </div>
+</div>
+
+<script type="module">
+import { FFmpeg } from
+  "https://cdn.jsdelivr.net/npm/@ffmpeg/ffmpeg@0.12.10/dist/esm/index.js";
+
+import { fetchFile, toBlobURL } from
+  "https://cdn.jsdelivr.net/npm/@ffmpeg/util@0.12.1/dist/esm/index.js";
+
+const fileInput = document.getElementById("videoFile");
+const convertBtn = document.getElementById("convertBtn");
+const fileInfo = document.getElementById("fileInfo");
+const progressArea = document.getElementById("progressArea");
+const progressBar = document.getElementById("progressBar");
+const progressText = document.getElementById("progressText");
+const progressPercent = document.getElementById("progressPercent");
+const statusEl = document.getElementById("status");
+const result = document.getElementById("result");
+const errorBox = document.getElementById("error");
+
+let selectedFile = null;
+let videoWidth = 0;
+let videoHeight = 0;
+let videoDuration = 0;
+let ffmpeg = null;
+let isLoaded = false;
+let outputUrl = null;
+
+function formatTime(seconds) {
+  if (!Number.isFinite(seconds)) return "Неизвестно";
+  const minutes = Math.floor(seconds / 60);
+  const secs = Math.floor(seconds % 60);
+  return `${minutes}:${String(secs).padStart(2, "0")}`;
+}
+
+function getRatio(w, h) {
+  const gcd = (a, b) => b ? gcd(b, a % b) : a;
+  const divisor = gcd(w, h);
+  return `${w / divisor}:${h / divisor}`;
+}
+
+function showError(message) {
+  errorBox.style.display = "block";
+  errorBox.textContent = message;
+}
+
+function setProgress(value, label) {
+  const percent = Math.max(0, Math.min(100, Math.round(value)));
+  progressBar.style.width = percent + "%";
+  progressPercent.textContent = percent + "%";
+  if (label) progressText.textContent = label;
+}
+
+fileInput.addEventListener("change", async () => {
+  const file = fileInput.files?.[0];
+  if (!file) return;
+
+  selectedFile = file;
+  result.style.display = "none";
+  errorBox.style.display = "none";
+
+  if (outputUrl) {
+    URL.revokeObjectURL(outputUrl);
+    outputUrl = null;
+  }
+
+  const previewUrl = URL.createObjectURL(file);
+  const video = document.createElement("video");
+  video.preload = "metadata";
+  video.muted = true;
+
+  video.onloadedmetadata = () => {
+    videoWidth = video.videoWidth;
+    videoHeight = video.videoHeight;
+    videoDuration = video.duration;
+
+    if (!videoWidth || !videoHeight) {
+      showError("Не удалось определить разрешение видео.");
+      convertBtn.disabled = true;
+      URL.revokeObjectURL(previewUrl);
+      return;
+    }
+
+    document.getElementById("fileName").textContent = file.name;
+    document.getElementById("fileResolution").textContent =
+      `${videoWidth} × ${videoHeight}`;
+
+    document.getElementById("fileRatio").textContent =
+      getRatio(videoWidth, videoHeight);
+
+    document.getElementById("fileDuration").textContent =
+      formatTime(videoDuration);
+
+    fileInfo.style.display = "block";
+    convertBtn.disabled = false;
+    URL.revokeObjectURL(previewUrl);
+  };
+
+  video.onerror = () => {
+    showError("Браузер не смог прочитать это видео. Попробуй другой файл.");
+    convertBtn.disabled = true;
+    URL.revokeObjectURL(previewUrl);
+  };
+
+  video.src = previewUrl;
+});
+
+async function loadFFmpeg() {
+  if (isLoaded) return;
+
+  statusEl.textContent = "Загрузка движка конвертации...";
+  ffmpeg = new FFmpeg();
+
+  ffmpeg.on("progress", ({ progress }) => {
+    if (Number.isFinite(progress)) {
+      setProgress(progress * 100, "Конвертация видео...");
+    }
+  });
+
+  const baseURL =
+    "https://cdn.jsdelivr.net/npm/@ffmpeg/core@0.12.6/dist/umd";
+
+  await ffmpeg.load({
+    coreURL: await toBlobURL(
+      `${baseURL}/ffmpeg-core.js`,
+      "text/javascript"
+    ),
+    wasmURL: await toBlobURL(
+      `${baseURL}/ffmpeg-core.wasm`,
+      "application/wasm"
+    )
+  });
+
+  isLoaded = true;
+}
+
+function createWatermark(width) {
+  const markWidth = Math.min(
+    520,
+    Math.max(170, Math.round(width * 0.27))
+  );
+
+  const markHeight = Math.round(markWidth * 0.22);
+
+  const canvas = document.createElement("canvas");
+  canvas.width = markWidth;
+  canvas.height = markHeight;
+
+  const ctx = canvas.getContext("2d");
+
+  ctx.textBaseline = "middle";
+  ctx.shadowColor = "rgba(0,0,0,0.8)";
+  ctx.shadowBlur = Math.max(3, markWidth * 0.012);
+  ctx.shadowOffsetX = 1;
+  ctx.shadowOffsetY = 2;
+
+  ctx.fillStyle = "rgba(255,255,255,0.88)";
+  ctx.font = `bold ${Math.round(markWidth * 0.145)}px Arial`;
+  ctx.fillText("360conv", 8, markHeight * 0.40);
+
+  ctx.font = `${Math.round(markWidth * 0.065)}px Arial`;
+  ctx.fillStyle = "rgba(255,255,255,0.78)";
+  ctx.fillText(
+    "shuto1337.github.io/360conv",
+    9,
+    markHeight * 0.76
+  );
+
+  return canvas;
+}
+
+function canvasToBlob(canvas) {
+  return new Promise((resolve, reject) => {
+    canvas.toBlob(blob => {
+      if (blob) resolve(blob);
+      else reject(new Error("Не удалось создать водяной знак."));
+    }, "image/png");
+  });
+}
+
+convertBtn.addEventListener("click", async () => {
+  if (!selectedFile) return;
+
+  convertBtn.disabled = true;
+  fileInput.disabled = true;
+  result.style.display = "none";
+  errorBox.style.display = "none";
+  progressArea.style.display = "block";
+  setProgress(0, "Подготовка...");
+  statusEl.textContent = "Инициализация конвертера...";
+
+  let inputName = "input-video";
+  let watermarkName = "watermark.png";
+  let outputName = "360conv-output.mp4";
+
+  try {
+    await loadFFmpeg();
+
+    statusEl.textContent = "Подготовка видео и водяного знака...";
+
+    const safeExtension =
+      (selectedFile.name.split(".").pop() || "mp4")
+        .toLowerCase()
+        .replace(/[^a-z0-9]/g, "") || "mp4";
+
+    inputName = `input.${safeExtension}`;
+
+    await ffmpeg.writeFile(inputName, await fetchFile(selectedFile));
+
+    const watermarkCanvas = createWatermark(videoWidth);
+    const watermarkBlob = await canvasToBlob(watermarkCanvas);
+
+    await ffmpeg.writeFile(
+      watermarkName,
+      new Uint8Array(await watermarkBlob.arrayBuffer())
+    );
+
+    const margin = Math.max(12, Math.round(videoWidth * 0.025));
+
+    const filter = [
+      `[0:v]scale=trunc(iw/2)*2:trunc(ih/2)*2,setsar=1[base]`,
+      `[1:v]format=rgba[wm]`,
+      `[base][wm]overlay=x=W-w-${margin}:y=H-h-${margin}:format=auto:shortest=1[v]`
+    ].join(";");
+
+    statusEl.textContent = "Конвертация. Не закрывай страницу...";
+    setProgress(0, "Конвертация видео...");
+
+    await ffmpeg.exec([
+      "-i", inputName,
+      "-loop", "1",
+      "-framerate", "30",
+      "-i", watermarkName,
+      "-filter_complex", filter,
+      "-map", "[v]",
+      "-map", "0:a?",
+      "-c:v", "libx264",
+      "-preset", "ultrafast",
+      "-crf", "23",
+      "-pix_fmt", "yuv420p",
+      "-c:a", "aac",
+      "-b:a", "128k",
+      "-shortest",
+      "-movflags", "+faststart",
+      outputName
+    ]);
+
+    statusEl.textContent = "Подготовка готового MP4...";
+    setProgress(100, "Завершение...");
+
+    const outputData = await ffmpeg.readFile(outputName);
+    const outputBlob = new Blob([outputData], {
+      type: "video/mp4"
+    });
+
+    outputUrl = URL.createObjectURL(outputBlob);
+
+    const link = document.getElementById("downloadLink");
+    link.href = outputUrl;
+    link.download =
+      selectedFile.name.replace(/\.[^.]+$/, "") + "-360conv.mp4";
+
+    result.style.display = "block";
+    statusEl.textContent = "Конвертация завершена!";
+    setProgress(100, "Готово!");
+
+    try {
+      await ffmpeg.deleteFile(inputName);
+      await ffmpeg.deleteFile(watermarkName);
+      await ffmpeg.deleteFile(outputName);
+    } catch (_) {}
+
+  } catch (error) {
+    console.error(error);
+
+    showError(
+      "Ошибка конвертации: " +
+      (error?.message || String(error)) +
+      "\n\nПопробуй видео меньшего размера или другой формат."
+    );
+
+    statusEl.textContent = "Не удалось выполнить конвертацию.";
+
+    try {
+      await ffmpeg?.deleteFile(inputName);
+      await ffmpeg?.deleteFile(watermarkName);
+      await ffmpeg?.deleteFile(outputName);
+    } catch (_) {}
+
+  } finally {
+    convertBtn.disabled = false;
+    fileInput.disabled = false;
+  }
+});
+</script>
+
+</body>
+</html>
