@@ -3,782 +3,557 @@
 <html lang="ru">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+<meta name="viewport" content="width=device-width, initial-scale=1">
 <meta name="theme-color" content="#080b12">
-<title>360conv — 3D Studio</title>
+<title>360conv — Spherical Metadata Converter</title>
 <style>
 *{box-sizing:border-box}
 body{
-  margin:0;background:#080b12;color:#eef5ff;
-  font-family:Arial,sans-serif;padding:18px 12px 35px;
+  margin:0;min-height:100vh;padding:22px 14px;
+  display:flex;justify-content:center;align-items:center;
+  background:radial-gradient(ellipse at top,#10283e,transparent 60%),#080b12;
+  color:#f1f6fc;font-family:Arial,sans-serif
 }
-header{text-align:center;padding:12px 0 22px}
-.logo{font-size:36px;font-weight:900;letter-spacing:-2px}
+.app{
+  width:100%;max-width:540px;padding:25px;
+  background:#111b29;border:1px solid #293e52;
+  border-radius:22px;box-shadow:0 20px 70px #0008
+}
+.logo{text-align:center;font-size:36px;font-weight:900;letter-spacing:-2px}
 .logo span{color:#00d4ff}
-.subtitle{font-size:13px;color:#8299b0;margin-top:7px}
-.app{max-width:900px;margin:auto}
-.panel{
-  background:#111c2a;border:1px solid #263d52;
-  border-radius:17px;padding:17px;margin-bottom:14px;
+.subtitle{text-align:center;color:#8da5ba;font-size:13px;margin:8px 0 25px}
+.section{
+  background:#0c1521;border:1px solid #25394d;
+  padding:15px;border-radius:14px;margin-bottom:15px
 }
-h2{font-size:16px;margin:0 0 14px}
-h3{font-size:13px;color:#a9bfd3;margin:15px 0 9px}
-.viewer{
-  position:relative;background:#05080d;border-radius:13px;
-  overflow:hidden;touch-action:pan-y;
+.section-title{font-weight:bold;font-size:14px;margin-bottom:10px}
+.description{font-size:12px;color:#9aafc2;line-height:1.6}
+.example{
+  display:block;width:100%;margin-top:12px;
+  border-radius:9px;overflow:hidden;
+  border:1px solid #334a60
 }
-#view{
-  width:100%;height:auto;aspect-ratio:2/1;
-  display:block;touch-action:none;
+.example img{display:block;width:100%;height:auto}
+.example-caption{font-size:11px;color:#8299ae;margin-top:7px}
+.upload{
+  display:block;padding:29px 14px;text-align:center;
+  border:2px dashed #35546d;border-radius:14px;
+  background:#142333;cursor:pointer
 }
-.hint{
-  color:#8198ad;font-size:12px;line-height:1.5;
-  margin-top:10px;text-align:center
+.upload:active{border-color:#00d4ff}
+.upload-icon{font-size:37px;margin-bottom:12px}
+.upload strong{display:block}
+.upload small{display:block;color:#8da5ba;margin-top:8px}
+input[type=file]{display:none}
+.info{
+  display:none;padding:13px;margin-top:14px;
+  border-radius:11px;background:#0a1420;
+  color:#a9bdcf;font-size:12px;line-height:1.9;
+  overflow-wrap:anywhere
 }
-.buttons{display:grid;grid-template-columns:repeat(2,1fr);gap:9px}
-button,select,input{
-  font:inherit;
+.info b{color:#fff}
+.warning{
+  margin-top:14px;padding:12px;
+  border-radius:10px;background:#302819;
+  color:#e8ca8a;font-size:12px;line-height:1.5
 }
 button{
-  border:1px solid #31516b;border-radius:10px;
-  padding:12px 10px;background:#192b3d;
-  color:#f1f7ff;font-weight:bold;cursor:pointer;
-}
-button:active{transform:scale(.98)}
-button.primary{
+  width:100%;padding:15px;margin-top:17px;
+  border:0;border-radius:11px;
   background:linear-gradient(110deg,#00a9df,#1265ff);
-  border:0;
+  color:white;font-size:15px;font-weight:bold;cursor:pointer
 }
-button.danger{background:#3b1922;border-color:#713044}
 button:disabled{opacity:.4;cursor:not-allowed}
-select,input[type=number]{
-  width:100%;padding:11px;border-radius:9px;
-  background:#0a1420;border:1px solid #30465b;
-  color:white;min-width:0;
+.progress{
+  display:none;margin-top:17px;padding:14px;
+  border-radius:11px;background:#0a1420
 }
-label{display:block;font-size:12px;color:#9fb3c7;margin-bottom:6px}
-.field{margin-bottom:12px}
-.coords{
-  display:grid;grid-template-columns:repeat(3,1fr);gap:8px
+.progress-head{display:flex;justify-content:space-between;font-size:12px}
+.track{height:8px;background:#26394b;border-radius:20px;margin-top:11px;overflow:hidden}
+.bar{height:100%;width:0;background:#00c9ff;transition:width .2s}
+.status{font-size:12px;color:#91a7bb;text-align:center;margin-top:11px;line-height:1.5}
+.result{
+  display:none;margin-top:17px;padding:16px;
+  border:1px solid #176b54;border-radius:12px;
+  background:#0c261e;text-align:center
 }
-.status{
-  font-size:12px;color:#8da6bd;line-height:1.5;
-  margin-top:12px;text-align:center
+.result h3{color:#6ae4ac;margin:0 0 8px}
+.result p{font-size:12px;color:#b3cabc;line-height:1.5}
+.download{
+  display:block;margin-top:13px;padding:15px;
+  border-radius:10px;background:#087e59;
+  color:white;text-decoration:none;font-weight:bold
 }
-.recording{
-  display:none;color:#ff7d8b;text-align:center;
-  font-size:13px;font-weight:bold;margin-top:12px
+.error{
+  display:none;margin-top:15px;padding:13px;
+  border-radius:10px;background:#39191e;
+  color:#ffb8b8;font-size:12px;line-height:1.5;
+  overflow-wrap:anywhere
 }
-#downloadArea{display:none;text-align:center}
-#downloadLink{
-  display:block;text-decoration:none;text-align:center;
-  padding:15px;border-radius:10px;background:#087e59;
-  color:white;font-weight:bold;margin-top:12px
-}
-.note{
-  font-size:12px;color:#71869b;line-height:1.6;
-  text-align:center;margin:18px 5px
-}
-@media(min-width:650px){
-  .editor{display:grid;grid-template-columns:1fr 1fr;gap:14px}
-  .editor .panel{margin-bottom:0}
-}
+.footer{text-align:center;color:#70869b;font-size:11px;line-height:1.7;margin-top:20px}
 </style>
 </head>
 <body>
 <div class="app">
-<header>
+
   <div class="logo">360<span>conv</span></div>
-  <div class="subtitle">Virtual 3D Studio · Создавай собственные 360°-миры</div>
-</header>
+  <div class="subtitle">Spherical Video Metadata Converter</div>
 
-<div class="panel">
-  <h2>Виртуальная сцена</h2>
-  <div class="viewer">
-    <canvas id="view"></canvas>
-  </div>
-  <div class="hint">
-    Вращай обзор пальцем или мышью. Приближай и отдаляй сцену жестом.
-  </div>
-</div>
-
-<div class="editor">
-<div class="panel">
-  <h2>Добавить объект</h2>
-  <div class="buttons">
-    <button id="addCube">🧊 Куб</button>
-    <button id="addSphere">🔮 Сфера</button>
-    <button id="addTree">🌳 Дерево</button>
-    <button id="addLamp">💡 Светильник</button>
-    <button id="addHouse">🏠 Домик</button>
-    <button id="addFloor">🟫 Платформа</button>
-  </div>
-
-  <h3>Выбранный объект</h3>
-  <div class="field">
-    <label for="objectSelect">Объект в сцене</label>
-    <select id="objectSelect">
-      <option value="">Нет объектов</option>
-    </select>
-  </div>
-
-  <h3>Положение объекта</h3>
-  <div class="coords">
-    <div class="field">
-      <label for="posX">X</label>
-      <input id="posX" type="number" step=".5" value="0">
+  <div class="section">
+    <div class="section-title">Как должно выглядеть исходное видео</div>
+    <div class="description">
+      Лучше импортировать уже подготовленные панорамные видео.
+      Они имеют вытянутый формат 2:1: изображение охватывает все
+      360 градусов по горизонтали и 180 градусов по вертикали.
     </div>
-    <div class="field">
-      <label for="posY">Y</label>
-      <input id="posY" type="number" step=".5" value="0">
-    </div>
-    <div class="field">
-      <label for="posZ">Z</label>
-      <input id="posZ" type="number" step=".5" value="0">
-    </div>
-  </div>
 
-  <div class="field">
-    <label for="scale">Размер объекта</label>
-    <input id="scale" type="range" min=".2" max="5" step=".1" value="1" style="width:100%">
-  </div>
-
-  <div class="buttons">
-    <button id="deleteObject" class="danger">Удалить объект</button>
-    <button id="resetObjects">Очистить объекты</button>
-  </div>
-</div>
-
-<div class="panel">
-  <h2>Настройки мира</h2>
-  <div class="field">
-    <label for="sceneSelect">Готовая сцена</label>
-    <select id="sceneSelect">
-      <option value="room">Комната</option>
-      <option value="night">Ночная комната</option>
-      <option value="white">Белая студия</option>
-      <option value="space">Космос</option>
-    </select>
-  </div>
-
-  <div class="buttons">
-    <button id="resetCamera">↻ Сбросить обзор</button>
-    <button id="addLight">☀ Добавить свет</button>
-  </div>
-
-  <h3>Создание видео</h3>
-  <div class="field">
-    <label for="videoDuration">Длительность записи (секунд)</label>
-    <select id="videoDuration">
-      <option value="10">10 секунд</option>
-      <option value="20">20 секунд</option>
-      <option value="30" selected>30 секунд</option>
-      <option value="60">60 секунд</option>
-    </select>
-  </div>
-
-  <button class="primary" id="recordBtn" style="width:100%">
-    ● Создать 360°-видео
-  </button>
-  <button class="danger" id="stopBtn" style="width:100%;margin-top:9px" disabled>
-    ■ Остановить запись
-  </button>
-
-  <div class="recording" id="recording">● ИДЁТ ЗАПИСЬ 360°-ВИДЕО</div>
-  <div class="status" id="status">
-    Сцена готова. Добавляй объекты и создавай видео.
-  </div>
-
-  <div id="downloadArea">
-    <a id="downloadLink" download="360conv-360-video.webm">
-      Скачать готовое видео
+    <a class="example"
+       href="https://commons.wikimedia.org/wiki/File:Exemplo_equirretangular.jpg"
+       target="_blank" rel="noopener">
+      <img
+        src="https://upload.wikimedia.org/wikipedia/commons/b/b5/Exemplo_equirretangular.jpg"
+        alt="Пример готовой панорамы 360 градусов">
     </a>
+    <div class="example-caption">
+      Пример панорамного изображения · Wikimedia Commons
+    </div>
+  </div>
+
+  <label class="upload" for="video">
+    <div class="upload-icon">🌐</div>
+    <strong>Загрузить видео</strong>
+    <small>Выбери подготовленный MP4-файл</small>
+  </label>
+
+  <input type="file" id="video" accept=".mp4,video/mp4">
+
+  <div class="info" id="info">
+    <div><b>Файл:</b> <span id="filename"></span></div>
+    <div><b>Разрешение:</b> <span id="resolution"></span></div>
+    <div><b>Соотношение:</b> <span id="ratio"></span></div>
+    <div><b>Размер:</b> <span id="filesize"></span></div>
+    <div><b>Формат:</b> MP4</div>
+  </div>
+
+  <div class="warning">
+    ⚠️ Для лучшего результата используй готовую панораму 2:1.
+    Обычное плоское видео не становится настоящей 360°-съёмкой
+    только благодаря метаданным.
+  </div>
+
+  <button id="convert" disabled>
+    Добавить 360°-метаданные
+  </button>
+
+  <div class="progress" id="progress">
+    <div class="progress-head">
+      <span id="progressLabel">Подготовка файла...</span>
+      <span id="percent">0%</span>
+    </div>
+    <div class="track"><div class="bar" id="bar"></div></div>
+    <div class="status" id="status">Чтение MP4...</div>
+  </div>
+
+  <div class="error" id="error"></div>
+
+  <div class="result" id="result">
+    <h3>Готово!</h3>
+    <p>Сферические метаданные добавлены. Изображение и видеопоток не перекодировались.</p>
+    <a class="download" id="download">Скачать готовый MP4</a>
+  </div>
+
+  <div class="footer">
+    360conv · shuto1337.github.io/360conv<br>
+    Без FFmpeg · Без перекодирования · Локальная обработка
   </div>
 </div>
-</div>
 
-<div class="note">
-  360conv · shuto1337.github.io/360conv<br>
-  Видео создаётся непосредственно в браузере через WebGL и MediaRecorder.
-  FFmpeg не используется.
-</div>
-</div>
-
-<script type="module">
-import * as THREE from
-  "https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js";
-
-import { OrbitControls } from
-  "https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/controls/OrbitControls.js";
-
+<script>
 const $ = id => document.getElementById(id);
 
-const canvas = $("view");
+let selectedFile = null;
+let videoWidth = 0;
+let videoHeight = 0;
+let outputURL = null;
+let busy = false;
 
-const renderer = new THREE.WebGLRenderer({
-  canvas,
-  antialias:true,
-  preserveDrawingBuffer:false
-});
-
-renderer.setPixelRatio(1);
-renderer.setSize(1024,512,false);
-renderer.outputColorSpace = THREE.SRGBColorSpace;
-renderer.toneMapping = THREE.ACESFilmicToneMapping;
-renderer.toneMappingExposure = 1;
-
-const scene = new THREE.Scene();
-scene.background = new THREE.Color(0x26384b);
-
-const camera = new THREE.PerspectiveCamera(70,2,.1,200);
-camera.position.set(0,1.7,5);
-
-const controls = new OrbitControls(camera,renderer.domElement);
-controls.target.set(0,1.5,0);
-controls.enableDamping = true;
-controls.dampingFactor = .07;
-controls.minDistance = 1;
-controls.maxDistance = 12;
-controls.maxPolarAngle = Math.PI-.05;
-controls.update();
-
-scene.add(new THREE.HemisphereLight(0xffffff,0x526174,2));
-
-const mainLight = new THREE.DirectionalLight(0xffffff,2.5);
-mainLight.position.set(3,8,5);
-scene.add(mainLight);
-
-const fillLight = new THREE.PointLight(0x68bfff,25,30);
-fillLight.position.set(-4,4,-3);
-scene.add(fillLight);
-
-const objects = [];
-let selected = null;
-let recorder = null;
-let recording = false;
-let recordingTimer = null;
-let chunks = [];
-let cubeCamera = null;
-let cubeTarget = null;
-let panoMaterial = null;
-let panoScene = null;
-let panoCamera = null;
-
-function material(color,roughness=.8){
-  return new THREE.MeshStandardMaterial({
-    color,
-    roughness,
-    metalness:.05
-  });
+function setProgress(value,label){
+  $("bar").style.width=value+"%";
+  $("percent").textContent=value+"%";
+  $("progressLabel").textContent=label;
 }
 
-function makeRoom(color=0x788b9c){
-  const room = new THREE.Group();
-
-  const floor = new THREE.Mesh(
-    new THREE.PlaneGeometry(20,20),
-    material(0x59636c)
-  );
-  floor.rotation.x=-Math.PI/2;
-  floor.position.y=0;
-  room.add(floor);
-
-  const wallMat=material(color);
-  const back=new THREE.Mesh(new THREE.PlaneGeometry(20,7),wallMat);
-  back.position.set(0,3.5,-10);
-  room.add(back);
-
-  const left=new THREE.Mesh(new THREE.PlaneGeometry(20,7),wallMat);
-  left.rotation.y=Math.PI/2;
-  left.position.set(-10,3.5,0);
-  room.add(left);
-
-  const right=new THREE.Mesh(new THREE.PlaneGeometry(20,7),wallMat);
-  right.rotation.y=-Math.PI/2;
-  right.position.set(10,3.5,0);
-  room.add(right);
-
-  const ceiling=new THREE.Mesh(
-    new THREE.PlaneGeometry(20,20),
-    material(0xc4cbd1)
-  );
-  ceiling.rotation.x=Math.PI/2;
-  ceiling.position.y=7;
-  room.add(ceiling);
-
-  return room;
+function showError(message){
+  $("error").style.display="block";
+  $("error").textContent=message;
 }
 
-let roomGroup=makeRoom();
-scene.add(roomGroup);
-
-function addObject(name,group){
-  group.name=name;
-  scene.add(group);
-  objects.push(group);
-  selected=group;
-  refreshObjects();
-  updateInputs();
+function gcd(a,b){
+  return b ? gcd(b,a%b) : a;
 }
 
-function makeCube(){
-  const group=new THREE.Group();
-  const mesh=new THREE.Mesh(
-    new THREE.BoxGeometry(1.3,1.3,1.3),
-    material(0x00bce9,.4)
-  );
-  mesh.position.y=.65;
-  group.add(mesh);
-  addObject("Куб",group);
+function ratio(w,h){
+  const d=gcd(w,h);
+  return `${w/d}:${h/d}`;
 }
 
-function makeSphere(){
-  const group=new THREE.Group();
-  const mesh=new THREE.Mesh(
-    new THREE.SphereGeometry(.75,32,24),
-    material(0xb46aff,.35)
-  );
-  mesh.position.y=.75;
-  group.add(mesh);
-  addObject("Сфера",group);
+function formatSize(bytes){
+  if(bytes<1024*1024)return (bytes/1024).toFixed(1)+" KB";
+  return (bytes/1024/1024).toFixed(2)+" MB";
 }
 
-function makeTree(){
-  const group=new THREE.Group();
+$("video").addEventListener("change",()=>{
+  const file=$("video").files[0];
+  if(!file)return;
 
-  const trunk=new THREE.Mesh(
-    new THREE.CylinderGeometry(.13,.18,1.2,12),
-    material(0x80512e)
-  );
-  trunk.position.y=.6;
-  group.add(trunk);
+  selectedFile=file;
+  $("error").style.display="none";
+  $("result").style.display="none";
+  $("info").style.display="none";
+  $("convert").disabled=true;
 
-  const leaves=new THREE.Mesh(
-    new THREE.ConeGeometry(.85,2.2,16),
-    material(0x278b54)
-  );
-  leaves.position.y=2;
-  group.add(leaves);
+  if(outputURL){
+    URL.revokeObjectURL(outputURL);
+    outputURL=null;
+  }
 
-  addObject("Дерево",group);
-}
-
-function makeLamp(){
-  const group=new THREE.Group();
-
-  const stand=new THREE.Mesh(
-    new THREE.CylinderGeometry(.06,.1,2,12),
-    material(0x999da5,.3)
-  );
-  stand.position.y=1;
-  group.add(stand);
-
-  const shade=new THREE.Mesh(
-    new THREE.ConeGeometry(.55,.7,20,1,true),
-    material(0xffd66b,.4)
-  );
-  shade.position.y=2.1;
-  shade.rotation.x=Math.PI;
-  group.add(shade);
-
-  const bulb=new THREE.PointLight(0xffd88a,15,9);
-  bulb.position.y=1.9;
-  group.add(bulb);
-
-  addObject("Светильник",group);
-}
-
-function makeHouse(){
-  const group=new THREE.Group();
-
-  const base=new THREE.Mesh(
-    new THREE.BoxGeometry(2,1.5,2),
-    material(0xe4c99c)
-  );
-  base.position.y=.75;
-  group.add(base);
-
-  const roof=new THREE.Mesh(
-    new THREE.ConeGeometry(1.65,1.2,4),
-    material(0xb84d42)
-  );
-  roof.position.y=2.1;
-  roof.rotation.y=Math.PI/4;
-  group.add(roof);
-
-  const door=new THREE.Mesh(
-    new THREE.BoxGeometry(.45,.9,.06),
-    material(0x64422e)
-  );
-  door.position.set(0,.45,1.03);
-  group.add(door);
-
-  addObject("Домик",group);
-}
-
-function makePlatform(){
-  const group=new THREE.Group();
-  const mesh=new THREE.Mesh(
-    new THREE.BoxGeometry(2.5,.25,2.5),
-    material(0x9b805d)
-  );
-  mesh.position.y=.125;
-  group.add(mesh);
-  addObject("Платформа",group);
-}
-
-$("addCube").onclick=makeCube;
-$("addSphere").onclick=makeSphere;
-$("addTree").onclick=makeTree;
-$("addLamp").onclick=makeLamp;
-$("addHouse").onclick=makeHouse;
-$("addFloor").onclick=makePlatform;
-
-function refreshObjects(){
-  const select=$("objectSelect");
-  select.innerHTML="";
-
-  if(!objects.length){
-    select.add(new Option("Нет объектов",""));
+  if(!file.name.toLowerCase().endsWith(".mp4")){
+    showError("Поддерживаются только MP4-файлы. Сначала экспортируй видео в MP4.");
     return;
   }
 
-  objects.forEach((obj,index)=>{
-    select.add(new Option(
-      `${obj.name} ${index+1}`,
-      String(index)
-    ));
-  });
+  const url=URL.createObjectURL(file);
+  const video=document.createElement("video");
+  video.preload="metadata";
 
-  select.value=String(objects.indexOf(selected));
-}
+  video.onloadedmetadata=()=>{
+    videoWidth=video.videoWidth;
+    videoHeight=video.videoHeight;
+    URL.revokeObjectURL(url);
 
-function updateInputs(){
-  if(!selected)return;
-  $("posX").value=selected.position.x.toFixed(1);
-  $("posY").value=selected.position.y.toFixed(1);
-  $("posZ").value=selected.position.z.toFixed(1);
+    $("filename").textContent=file.name;
+    $("resolution").textContent=`${videoWidth} × ${videoHeight}`;
+    $("ratio").textContent=ratio(videoWidth,videoHeight);
+    $("filesize").textContent=formatSize(file.size);
 
-  const scale=selected.scale.x;
-  $("scale").value=scale;
-}
+    $("info").style.display="block";
+    $("convert").disabled=false;
 
-$("objectSelect").onchange=()=>{
-  selected=objects[Number($("objectSelect").value)]||null;
-  updateInputs();
-};
-
-function applyPosition(){
-  if(!selected)return;
-  selected.position.set(
-    Number($("posX").value)||0,
-    Number($("posY").value)||0,
-    Number($("posZ").value)||0
-  );
-}
-
-["posX","posY","posZ"].forEach(id=>{
-  $(id).addEventListener("input",applyPosition);
-});
-
-$("scale").oninput=()=>{
-  if(!selected)return;
-  const s=Number($("scale").value);
-  selected.scale.setScalar(s);
-};
-
-$("deleteObject").onclick=()=>{
-  if(!selected)return;
-  scene.remove(selected);
-  objects.splice(objects.indexOf(selected),1);
-  selected=objects[objects.length-1]||null;
-  refreshObjects();
-  updateInputs();
-};
-
-$("resetObjects").onclick=()=>{
-  objects.forEach(obj=>scene.remove(obj));
-  objects.length=0;
-  selected=null;
-  refreshObjects();
-  updateInputs();
-};
-
-$("resetCamera").onclick=()=>{
-  camera.position.set(0,1.7,5);
-  controls.target.set(0,1.5,0);
-  controls.update();
-};
-
-$("addLight").onclick=()=>{
-  const light=new THREE.PointLight(0xffffff,25,15);
-  light.position.set(
-    (Math.random()-.5)*8,
-    3+Math.random()*3,
-    (Math.random()-.5)*8
-  );
-  scene.add(light);
-
-  const marker=new THREE.Mesh(
-    new THREE.SphereGeometry(.12,12,8),
-    new THREE.MeshBasicMaterial({color:0xffee88})
-  );
-  marker.position.copy(light.position);
-  scene.add(marker);
-
-  const group=new THREE.Group();
-  group.add(light);
-  group.add(marker);
-  addObject("Дополнительный свет",group);
-};
-
-$("sceneSelect").onchange=()=>{
-  const mode=$("sceneSelect").value;
-  scene.remove(roomGroup);
-
-  if(mode==="room"){
-    scene.background=new THREE.Color(0x26384b);
-    roomGroup=makeRoom(0x788b9c);
-  }else if(mode==="night"){
-    scene.background=new THREE.Color(0x080e20);
-    roomGroup=makeRoom(0x26334c);
-  }else if(mode==="white"){
-    scene.background=new THREE.Color(0xcbd4df);
-    roomGroup=makeRoom(0xe3e6eb);
-  }else{
-    scene.background=new THREE.Color(0x030510);
-    roomGroup=new THREE.Group();
-
-    const stars=new THREE.BufferGeometry();
-    const positions=[];
-    for(let i=0;i<1200;i++){
-      positions.push(
-        (Math.random()-.5)*100,
-        (Math.random()-.5)*60,
-        (Math.random()-.5)*100
-      );
+    if(Math.abs(videoWidth/videoHeight-2)>0.03){
+      $("status").textContent=
+        "Формат не 2:1. Метаданные всё равно можно добавить, но YouTube может отображать видео некорректно.";
     }
-    stars.setAttribute(
-      "position",
-      new THREE.Float32BufferAttribute(positions,3)
+  };
+
+  video.onerror=()=>{
+    URL.revokeObjectURL(url);
+    showError("Не удалось прочитать видео. Попробуй другой MP4-файл.");
+  };
+
+  video.src=url;
+});
+
+function readBoxes(bytes){
+  const boxes=[];
+  const view=new DataView(bytes.buffer,bytes.byteOffset,bytes.byteLength);
+  let pos=0;
+
+  while(pos+8<=bytes.length){
+    let size=view.getUint32(pos);
+    const type=String.fromCharCode(
+      bytes[pos+4],bytes[pos+5],bytes[pos+6],bytes[pos+7]
     );
-    const points=new THREE.Points(
-      stars,
-      new THREE.PointsMaterial({color:0xffffff,size:.13})
-    );
-    roomGroup.add(points);
 
-    const planet=new THREE.Mesh(
-      new THREE.SphereGeometry(4,32,24),
-      new THREE.MeshStandardMaterial({
-        color:0x254c9b,
-        roughness:.8
-      })
-    );
-    planet.position.set(0,-7,-15);
-    roomGroup.add(planet);
-  }
+    let header=8;
 
-  scene.add(roomGroup);
-};
+    if(size===1){
+      if(pos+16>bytes.length)throw new Error("Повреждённый MP4-блок.");
+      const big=view.getBigUint64(pos+8);
+      if(big>BigInt(Number.MAX_SAFE_INTEGER))throw new Error("Слишком большой MP4-блок.");
+      size=Number(big);
+      header=16;
+    }else if(size===0){
+      size=bytes.length-pos;
+    }
 
-function createPanoramaRenderer(){
-  cubeTarget=new THREE.WebGLCubeRenderTarget(512,{
-    generateMipmaps:true,
-    minFilter:THREE.LinearMipmapLinearFilter,
-    colorSpace:THREE.SRGBColorSpace
-  });
+    if(size<header||pos+size>bytes.length){
+      throw new Error("Неправильная структура MP4. Файл может быть повреждён.");
+    }
 
-  cubeCamera=new THREE.CubeCamera(.1,150,cubeTarget);
-
-  panoScene=new THREE.Scene();
-  panoCamera=new THREE.OrthographicCamera(-1,1,1,-1,0,1);
-
-  panoMaterial=new THREE.ShaderMaterial({
-    uniforms:{
-      tCube:{value:cubeTarget.texture}
-    },
-    vertexShader:`
-      varying vec2 vUv;
-      void main(){
-        vUv=uv;
-        gl_Position=vec4(position,1.0);
-      }
-    `,
-    fragmentShader:`
-      uniform samplerCube tCube;
-      varying vec2 vUv;
-
-      void main(){
-        float lon=(vUv.x-.5)*6.28318530718;
-        float lat=(.5-vUv.y)*3.14159265359;
-
-        vec3 dir=vec3(
-          cos(lat)*sin(lon),
-          sin(lat),
-          cos(lat)*cos(lon)
-        );
-
-        gl_FragColor=textureCube(tCube,dir);
-      }
-    `,
-    depthTest:false,
-    depthWrite:false
-  });
-
-  const plane=new THREE.Mesh(
-    new THREE.PlaneGeometry(2,2),
-    panoMaterial
-  );
-  panoScene.add(plane);
-}
-
-createPanoramaRenderer();
-
-let lastTime=0;
-
-function animate(time){
-  requestAnimationFrame(animate);
-
-  if(!recording){
-    controls.update();
-    renderer.render(scene,camera);
-  }else{
-    // Сферическая камера смотрит во все стороны сцены.
-    cubeCamera.position.copy(camera.position);
-    cubeCamera.quaternion.copy(camera.quaternion);
-    cubeCamera.update(renderer,scene);
-
-    // Выводим панораму 2:1 на тот же canvas, который записывает MediaRecorder.
-    renderer.render(panoScene,panoCamera);
-  }
-
-  lastTime=time;
-}
-requestAnimationFrame(animate);
-
-function getMimeType(){
-  if(!window.MediaRecorder)return "";
-
-  const types=[
-    "video/mp4",
-    "video/webm;codecs=vp9",
-    "video/webm;codecs=vp8",
-    "video/webm"
-  ];
-
-  return types.find(type=>MediaRecorder.isTypeSupported(type))||"";
-}
-
-function stopRecording(){
-  if(recorder && recorder.state!=="inactive"){
-    recorder.stop();
-  }
-}
-
-$("recordBtn").onclick=async()=>{
-  if(recording)return;
-
-  if(!canvas.captureStream || !window.MediaRecorder){
-    $("status").textContent=
-      "Этот браузер не поддерживает запись WebGL-видео. Попробуй обновить Safari.";
-    return;
-  }
-
-  const mime=getMimeType();
-  if(!mime){
-    $("status").textContent=
-      "Браузер не поддерживает доступный формат записи видео.";
-    return;
-  }
-
-  try{
-    $("downloadArea").style.display="none";
-    $("status").textContent="Подготовка сферической камеры...";
-
-    // Сначала обновляем панорамную камеру.
-    cubeCamera.position.copy(camera.position);
-    cubeCamera.quaternion.copy(camera.quaternion);
-    cubeCamera.update(renderer,scene);
-    renderer.render(panoScene,panoCamera);
-
-    const stream=canvas.captureStream(15);
-    chunks=[];
-
-    recorder=new MediaRecorder(stream,{
-      mimeType:mime,
-      videoBitsPerSecond:8000000
+    boxes.push({
+      type,
+      start:pos,
+      size,
+      header,
+      end:pos+size,
+      raw:bytes.subarray(pos,pos+size)
     });
 
-    recorder.ondataavailable=event=>{
-      if(event.data && event.data.size>0){
-        chunks.push(event.data);
-      }
-    };
-
-    recorder.onstop=()=>{
-      recording=false;
-      clearTimeout(recordingTimer);
-
-      stream.getTracks().forEach(track=>track.stop());
-
-      const blob=new Blob(chunks,{type:mime});
-      const url=URL.createObjectURL(blob);
-      const isMp4=mime.includes("mp4");
-      const extension=isMp4?"mp4":"webm";
-
-      const link=$("downloadLink");
-      link.href=url;
-      link.download=`360conv-360-video.${extension}`;
-
-      $("downloadArea").style.display="block";
-      $("recording").style.display="none";
-      $("recordBtn").disabled=false;
-      $("stopBtn").disabled=true;
-
-      $("status").textContent=
-        `Запись готова. Размер файла: ${(blob.size/1024/1024).toFixed(1)} МБ. Формат: ${extension.toUpperCase()}.`;
-
-      // Возвращаем обычный вид сцены.
-      renderer.render(scene,camera);
-    };
-
-    recorder.onerror=event=>{
-      console.error(event);
-      $("status").textContent="Ошибка записи видео.";
-      stopRecording();
-    };
-
-    recording=true;
-    recorder.start(1000);
-
-    $("recordBtn").disabled=true;
-    $("stopBtn").disabled=false;
-    $("recording").style.display="block";
-    $("status").textContent=
-      "Записывается сферическая панорама. Пожалуйста, не закрывай страницу.";
-
-    const seconds=Number($("videoDuration").value);
-    recordingTimer=setTimeout(stopRecording,seconds*1000);
-
-  }catch(error){
-    console.error(error);
-    recording=false;
-    $("recordBtn").disabled=false;
-    $("stopBtn").disabled=true;
-    $("recording").style.display="none";
-    $("status").textContent=
-      "Не удалось начать запись: "+(error.message||error);
+    pos+=size;
   }
-};
 
-$("stopBtn").onclick=stopRecording;
+  if(pos!==bytes.length)throw new Error("Не удалось разобрать структуру MP4.");
+  return boxes;
+}
 
-window.addEventListener("resize",()=>{
-  // Сохраняем панорамное соотношение 2:1.
-  renderer.setSize(1024,512,false);
-});
+function concat(parts){
+  const total=parts.reduce((sum,p)=>sum+p.length,0);
+  const out=new Uint8Array(total);
+  let pos=0;
 
+  for(const part of parts){
+    out.set(part,pos);
+    pos+=part.length;
+  }
+
+  return out;
+}
+
+function makeBox(type,payload){
+  const size=8+payload.length;
+  if(size>0xffffffff)throw new Error("Слишком большой блок MP4.");
+
+  const out=new Uint8Array(size);
+  const view=new DataView(out.buffer);
+
+  view.setUint32(0,size);
+  for(let i=0;i<4;i++)out[4+i]=type.charCodeAt(i);
+  out.set(payload,8);
+
+  return out;
+}
+
+const UUID=[
+  0xff,0xcc,0x82,0x63,0xf8,0x55,0x4a,0x93,
+  0x88,0x14,0x58,0x7a,0x02,0x51,0xfd,0xdd
+];
+
+function isOurUuid(box){
+  if(box.type!=="uuid"||box.header!==8||box.size<24)return false;
+  for(let i=0;i<16;i++){
+    if(box.raw[8+i]!==UUID[i])return false;
+  }
+  return true;
+}
+
+function isVideoTrack(raw){
+  const trak=readBoxes(raw);
+
+  for(const box of trak){
+    if(box.type!=="mdia")continue;
+
+    for(const child of readBoxes(box.raw.subarray(box.header))){
+      if(child.type!=="hdlr")continue;
+
+      const data=child.raw;
+      const offset=child.header+8;
+
+      if(data.length>=offset+4){
+        const handler=String.fromCharCode(
+          data[offset],data[offset+1],data[offset+2],data[offset+3]
+        );
+        return handler==="vide";
+      }
+    }
+  }
+  return false;
+}
+
+function metadataXml(){
+  return `<?xml version="1.0"?>
+<rdf:SphericalVideo
+ xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+ xmlns:GSpherical="http://ns.google.com/videos/1.0/spherical/">
+ <GSpherical:Spherical>true</GSpherical:Spherical>
+ <GSpherical:Stitched>true</GSpherical:Stitched>
+ <GSpherical:ProjectionType>equirectangular</GSpherical:ProjectionType>
+ <GSpherical:StereoMode>mono</GSpherical:StereoMode>
+ <GSpherical:StitchingSoftware>360conv</GSpherical:StitchingSoftware>
+ <GSpherical:FullPanoWidthPixels>${videoWidth}</GSpherical:FullPanoWidthPixels>
+ <GSpherical:FullPanoHeightPixels>${videoHeight}</GSpherical:FullPanoHeightPixels>
+ <GSpherical:CroppedAreaImageWidthPixels>${videoWidth}</GSpherical:CroppedAreaImageWidthPixels>
+ <GSpherical:CroppedAreaImageHeightPixels>${videoHeight}</GSpherical:CroppedAreaImageHeightPixels>
+ <GSpherical:CroppedAreaTopPixels>0</GSpherical:CroppedAreaTopPixels>
+ <GSpherical:CroppedAreaLeftPixels>0</GSpherical:CroppedAreaLeftPixels>
+</rdf:SphericalVideo>`;
+}
+
+function makeUuidBox(){
+  const xml=new TextEncoder().encode(metadataXml());
+  const payload=new Uint8Array(16+xml.length);
+  payload.set(UUID,0);
+  payload.set(xml,16);
+  return makeBox("uuid",payload);
+}
+
+function updateChunkOffsets(raw,delta){
+  if(delta===0)return raw;
+
+  const boxes=readBoxes(raw);
+  const box=boxes[0];
+  const out=raw.slice();
+  const view=new DataView(out.buffer,out.byteOffset,out.byteLength);
+
+  const count=view.getUint32(box.header+4);
+  const is64=box.type==="co64";
+  const entrySize=is64?8:4;
+
+  if(box.header+8+count*entrySize>out.length){
+    throw new Error("Некорректная таблица адресов MP4.");
+  }
+
+  for(let i=0;i<count;i++){
+    const offset=box.header+8+i*entrySize;
+
+    if(is64){
+      const old=view.getBigUint64(offset);
+      view.setBigUint64(offset,old+BigInt(delta));
+    }else{
+      const old=view.getUint32(offset);
+      const next=old+delta;
+      if(next>0xffffffff){
+        throw new Error("MP4 требует расширенной таблицы адресов. Этот файл пока не поддерживается.");
+      }
+      view.setUint32(offset,next);
+    }
+  }
+
+  return out;
+}
+
+const CONTAINERS=new Set([
+  "moov","trak","mdia","minf","stbl","edts","dinf",
+  "mvex","moof","traf","mfra"
+]);
+
+function transformBox(raw,delta,addMetadata){
+  const boxes=readBoxes(raw);
+  if(boxes.length!==1)throw new Error("Некорректный MP4-блок.");
+
+  const box=boxes[0];
+
+  if(box.type==="stco"||box.type==="co64"){
+    return updateChunkOffsets(raw,delta);
+  }
+
+  if(!CONTAINERS.has(box.type))return raw;
+
+  const childrenRaw=raw.subarray(box.header);
+  const children=readBoxes(childrenRaw);
+  const parts=[];
+
+  let videoTrack=false;
+
+  if(box.type==="trak"&&addMetadata){
+    videoTrack=isVideoTrack(raw);
+  }
+
+  for(const child of children){
+    if(box.type==="trak"&&isOurUuid(child)){
+      continue;
+    }
+
+    parts.push(transformBox(child.raw,delta,addMetadata));
+  }
+
+  if(videoTrack){
+    parts.push(makeUuidBox());
+  }
+
+  return makeBox(box.type,concat(parts));
+}
+
+async function convert(){
+  if(!selectedFile||busy)return;
+  busy=true;
+
+  $("convert").disabled=true;
+  $("error").style.display="none";
+  $("result").style.display="none";
+  $("progress").style.display="block";
+
+  try{
+    setProgress(5,"Чтение MP4...");
+    $("status").textContent="Открытие файла в памяти браузера.";
+
+    const input=new Uint8Array(await selectedFile.arrayBuffer());
+
+    setProgress(15,"Проверка структуры...");
+    const top=readBoxes(input);
+
+    const ftyp=top.find(b=>b.type==="ftyp");
+    const moov=top.find(b=>b.type==="moov");
+    const mdat=top.find(b=>b.type==="mdat");
+
+    if(!ftyp||!moov||!mdat){
+      throw new Error("Файл не похож на обычный MP4. Нужен MP4 с блоками ftyp, moov и mdat.");
+    }
+
+    if(top.some(b=>b.type==="moof")){
+      throw new Error("Фрагментированные MP4 пока не поддерживаются. Используй обычный MP4-файл.");
+    }
+
+    setProgress(30,"Добавление сферических метаданных...");
+    $("status").textContent="Обработка видеодорожки. Само видео не перекодируется.";
+
+    // Сначала определяем новый размер moov после добавления метаданных.
+    const firstPass=transformBox(moov.raw,0,true);
+    const delta=firstPass.length-moov.size;
+
+    // Если moov находится перед mdat, обновляем абсолютные адреса медиаданных.
+    const moovBeforeMdat=moov.start<mdat.start;
+    const finalMoov=transformBox(
+      moov.raw,
+      moovBeforeMdat?delta:0,
+      true
+    );
+
+    setProgress(65,"Сборка нового MP4...");
+    $("status").textContent="Сохранение структуры исходного файла.";
+
+    const outputParts=[];
+
+    for(const box of top){
+      if(box.type==="moov"){
+        outputParts.push(finalMoov);
+      }else{
+        outputParts.push(box.raw);
+      }
+    }
+
+    const output=concat(outputParts);
+
+    setProgress(90,"Подготовка результата...");
+
+    const blob=new Blob([output],{type:"video/mp4"});
+
+    if(outputURL)URL.revokeObjectURL(outputURL);
+    outputURL=URL.createObjectURL(blob);
+
+    const link=$("download");
+    const baseName=selectedFile.name.replace(/\.mp4$/i,"");
+    link.href=outputURL;
+    link.download=baseName+"-360conv.mp4";
+
+    $("result").style.display="block";
+    setProgress(100,"Готово!");
+    $("status").textContent=
+      "Метаданные добавлены. Исходное видео и аудио не перекодировались.";
+
+  }catch(e){
+    console.error(e);
+    showError(
+      "Не удалось обработать файл:\n"+
+      (e.message||String(e))
+    );
+    $("status").textContent="Обработка завершилась с ошибкой.";
+  }finally{
+    busy=false;
+    $("convert").disabled=false;
+  }
+}
+
+$("convert").addEventListener("click",convert);
 </script>
 </body>
 </html>
